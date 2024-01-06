@@ -22,7 +22,9 @@ import javax.management.relation.Role;
 
 public class Game {
         private Parser parser;
+        private Jogador jogador;
         private Regiao currentRoom;
+        private Date date;
         private Regiao barreiro, centro, oeste, pampulha, vendaNova, leste;
         private Roles parqueJacques,
                         shoppingDelRey,
@@ -64,67 +66,254 @@ public class Game {
                 createRegioes();
 
                 parser = new Parser();
+                jogador = new Jogador();
         }
 
-        // *Cria todos os presentes disponíveis
-        private void createPresentes() {
-                bichoPelucia = new Presente("Girafa de Pelúcia",
-                                "Encante-se com a fofura desta adorável girafa de pelúcia. Perfeita para abraçar e decorar qualquer ambiente, esta pelúcia traz consigo a doçura e o encanto que só um presente especial pode oferecer.");
+        /**
+         * Main play routine. Loops until end of play.
+         */
+        public void play() {
+                printWelcome();
 
-                terco = new Presente("Terço",
-                                "Encontre paz e espiritualidade com este belo terço, uma manifestação de fé e devoção. Cada conta representa uma prece, guiando-o por um caminho de serenidade e conexão espiritual.");
+                // Enter the main command loop. Here we repeatedly read commands and
+                // execute them until the game is over.
 
-                incenso = new Presente(
-                                "Incenso de Lavanda",
-                                "Desperte seus sentidos com o aroma relaxante da lavanda. Este incenso é uma ode à tranquilidade, proporcionando uma atmosfera calma e serena para momentos de meditação e relaxamento.");
+                boolean finished = false;
+                while (!finished) {
+                        Command command = parser.getCommand();
+                        finished = processCommand(command);
+                }
+                System.out.println("Thank you for playing.  Good bye.");
+        }
 
-                pinBroche = new Presente("Pin Broche Personalizado do Parque",
-                                "Leve consigo uma lembrança única do nosso parque! Este pin personalizado é um símbolo especial que representa momentos divertidos e memoráveis, oferecendo um toque especial a qualquer coleção.");
+        /**
+         * Given a command, process (that is: execute) the command.
+         * 
+         * @param command The command to be processed.
+         * @return true If the command ends the game, false otherwise.
+         */
+        private boolean processCommand(Command command) {
+                boolean wantToQuit = false;
 
-                camisaDeTime = new Presente("Camisa de Time",
-                                "Mostre seu amor pelo esporte e pelo seu time favorito com esta camisa oficial. Além de expressar sua paixão, esta peça é um símbolo de união e lealdade à equipe que você tanto admira.");
+                if (command.isUnknown()) {
+                        System.out.println("I don't know what you mean...");
+                        return false;
+                }
 
-                grudeTattoo = new Presente("Grude Tattoo",
-                                "Experimente a arte da tatuagem temporária com o Grude Tattoo! Esta tatuagem é uma expressão temporária de estilo e personalidade, permitindo que você exiba designs únicos por um tempo antes de desaparecer suavemente.");
+                String commandWord = command.getCommandWord();
+                if (commandWord.equals("help")) {
+                        printHelp();
+                } else if (commandWord.equals("go")) {
+                        goRegiao(command);
+                } else if (commandWord.equals("quit")) {
+                        wantToQuit = quit(command);
+                } else if (commandWord.equals("enter")) {
+                        enterRole(command); // !Criar função para entrar no rolê
+                }
 
-                buqueDeFlor = new Presente("Buquê de Flores",
-                                "Celebre momentos especiais com a beleza e fragrância deste encantador buquê de flores. Cada flor é um símbolo de carinho e afeto, transmitindo emoções que vão além das palavras.");
+                return wantToQuit;
+        }
 
-                lataRefrigerante = new Presente("Lata de Refrigerante",
-                                "Refresque-se com esta lata de refrigerante, perfeita para momentos de descontração e diversão. Uma bebida gelada para acompanhar os melhores momentos da vida.");
+        /**
+         * Print out the opening message for the player.
+         */
+        private void printWelcome() {
+                System.out.println();
+                System.out.println("Bem vindo ao desafio Find the Date!");
+                System.out.println(
+                                "Neste desafio você terá que realizar uma pesquisa de campo para descobrir qual o melhor rolê para levar a sua paixão! E como você deseja impressiona-la, escolha um presente que você ache que combine com ela.");
+                System.out.println("");
+                System.out.println("Para obter ajuda digite 'help'");
+                System.out.println();
 
-                chaveiro = new Presente("Chaveiro Personalizado do Mirante",
-                                "Carregue consigo a lembrança de vistas panorâmicas deslumbrantes com este chaveiro personalizado do nosso mirante. Este objeto é mais do que um acessório; é uma conexão com momentos memoráveis e paisagens deslumbrantes.");
+                geraDateAleatorio();
+                geraRoleAleatorio(); // !Continuar daqui, gerar role aleatorio, implementar funcao "remember", "pick
+                                     // present", "pick role" e "choose"
 
-                quadroDecorativo = new Presente("Quadro Decorativo",
-                                "Transforme qualquer espaço com a beleza deste quadro decorativo. Cada detalhe da obra de arte é uma expressão de criatividade e estilo, adicionando personalidade e charme a qualquer ambiente.");
+                System.out.println("Você iniciou sua busca na região: " + currentRoom.getNome()
+                                + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
+                System.out.println("");
+                for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
+                        System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
 
-                filtroDosSonhos = new Presente("Filtro dos Sonhos",
-                                "Deixe-se envolver pela magia e pelo simbolismo deste belo filtro dos sonhos. Originário das tradições indígenas, este artefato é mais do que um adorno decorativo; é um guardião dos sonhos.");
+                }
+                System.out.print("Para sair desta região digite para onde deseja ir: ");
+                if (currentRoom.getNorthExit() != null) {
+                        System.out.print("north ");
+                }
+                if (currentRoom.getNorthExit() != null) {
+                        System.out.print("east ");
+                }
+                if (currentRoom.getSouthExit() != null) {
+                        System.out.print("south ");
+                }
+                if (currentRoom.getWestExit() != null) {
+                        System.out.print("west ");
+                }
+                System.out.println();
+        }
 
-                copoPersonalizado = new Presente("Copo Personalizado",
-                                "Desfrute de suas bebidas favoritas com estilo usando este copo personalizado. Cada detalhe deste copo foi pensado para proporcionar uma experiência única de degustação, unindo elegância e praticidade.");
+        private void geraDateAleatorio() {
+                // *Gera um date aleatório
+                Date[] listaDates = { Maria, Lucas, Sofia, Ana, Joao, Pedro, Rafael };
+                Random randomDate = new Random();
+                date = listaDates[randomDate.nextInt(listaDates.length)];
+                System.out.println("\n\n******************************");
+                System.out.println("O date sorteado foi:" + date.getNome());
+                System.out.println("******************************\n");
+                System.err.println(date.getDescricao());
+                System.out.println("Digite \"remember date \" para relembrar de seu date!");
+        }
 
-                ingressosOpenBar = new Presente("Ingressos Open Bar para um festival de música eletrônica",
-                                "Preparado para uma experiência única e eletrizante? Junte-se a nós no Festival Épico de Música Eletrônica, onde a batida envolvente e os ritmos pulsantes ganham vida em um espetáculo inigualável!");
+        // implementations of user commands:
 
-                copoStanley = new Presente("Copo Stanley",
-                                "Apresentamos o Copo Stanley, uma obra-prima de engenharia que transcende a mera funcionalidade, elevando o ato de saborear sua bebida a um novo patamar. Combinando estilo clássico e desempenho excepcional, este copo é mais do que um recipiente; é uma afirmação de qualidade e bom gosto.");
+        /**
+         * Print out some help information.
+         * Here we print some stupid, cryptic message and a list of the
+         * command words.
+         */
+        private void printHelp() {
+                System.out.println("You are lost. You are alone. You wander");
+                System.out.println("around at the university.");
+                System.out.println();
+                System.out.println("Your command words are:");
+                System.out.println("   go enter quit help");
+        }
 
-                garrafaRoyalSalute = new Presente("Uma garrafa de Royal Salute.",
-                                "Descubra a realeza no mundo dos whiskies com a lendária garrafa de Royal Salute. Esta obra-prima destilada é um tributo à tradição, elegância e maestria na arte do whisky escocês. Cada gole é uma jornada sensorial que transcende o comum, levando você a um reino de sofisticação.");
+        /**
+         * Try to go in one direction. If there is an exit, enter
+         * the new room, otherwise print an error message.
+         */
+        private void goRegiao(Command command) {
+                if (!command.hasSecondWord()) {
+                        // if there is no second word, we don't know where to go...
+                        System.out.println("Go where?");
+                        return;
+                }
 
-                ingressosBalada = new Presente(" Ingressos para uma balada na cidade",
-                                "Prepare-se para uma experiência única e eletrizante! Apresentamos os ingressos para a Balada City Vibes, uma noite que promete ser o ápice da diversão e boa música na cidade. Garanta seu lugar para uma celebração épica que ficará gravada na memória!");
+                String direction = command.getSecondWord();
 
-                discoDeVinil = new Presente("Um disco de vinil de MPB.",
-                                "Mergulhe na riqueza sonora da Música Popular Brasileira com este autêntico disco de vinil. Mais do que uma simples coleção de músicas, este vinil é uma jornada emocional pelas melodias cativantes e poesias profundas que definem a essência da música brasileira.");
+                // Try to leave current room.
+                Regiao nextRoom = null;
+                if (direction.equals("north")) {
+                        nextRoom = currentRoom.getNorthExit();
+                }
+                if (direction.equals("east")) {
+                        nextRoom = currentRoom.getEastExit();
+                }
+                if (direction.equals("south")) {
+                        nextRoom = currentRoom.getSouthExit();
+                }
+                if (direction.equals("west")) {
+                        nextRoom = currentRoom.getWestExit();
+                }
 
-                livroAutografado = new Presente("Um livro autografado por Taylor Jenkins Reid.",
-                                "Se você é apaixonado por literatura, não pode perder a oportunidade de possuir uma jóia literária única. Apresentamos a edição especial autografada de Os sete maridos de Evelyn Hugo  pela renomada autora Taylor Jenkins Reid.");
+                if (nextRoom == null) {
+                        System.out.println("There is no door!");
+                } // !Criar um menu para o usuário escolher os rolês
+                else {
+                        currentRoom = nextRoom;
+                        System.out.println("Você chegou na região " + currentRoom.getNome()
+                                        + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
+                        System.out.println("");
+                        for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
+                                System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
 
-                boneViseiraEsportiva = new Presente("Boné ou Viseira Esportiva.",
-                                "Explore o mundo esportivo com um toque de estilo e proteção solar. Apresentamos a escolha entre o clássico Boné e a elegante Viseira Esportiva, ambos desenhados para elevar o seu visual durante suas atividades ao ar livre.");
+                        }
+
+                        System.out.print("Exits: ");
+                        if (currentRoom.getNorthExit() != null) {
+                                System.out.print("north ");
+                        }
+                        if (currentRoom.getEastExit() != null) {
+                                System.out.print("east ");
+                        }
+                        if (currentRoom.getSouthExit() != null) {
+                                System.out.print("south ");
+                        }
+                        if (currentRoom.getWestExit() != null) {
+                                System.out.print("west ");
+                        }
+                        System.out.println();
+                }
+        }
+
+        private void enterRole(Command command) {
+                if (!command.hasSecondWord()) {
+                        // if there is no second word, we don't know where to go...
+                        System.out.println("Enter where?");
+                        return;
+                }
+
+                String direction = command.getSecondWord();
+                Regiao nextRoom = null;
+                // Try to leave current room.
+                if (Integer.parseInt(direction) + 1 > currentRoom.getListaRoles().size()
+                                || Integer.parseInt(direction) + 1 < 0) {
+                        nextRoom = null;
+                } else {
+                        Roles role = currentRoom.getListaRoles().get(Integer.parseInt(direction));
+                        System.err.println(role.getNome());
+                        System.err.println(role.getDescricao());
+                }
+
+                // !Modelo
+                if (direction.equals("north")) {
+                        nextRoom = currentRoom.getNorthExit();
+                }
+                if (direction.equals("east")) {
+                        nextRoom = currentRoom.getEastExit();
+                }
+                if (direction.equals("south")) {
+                        nextRoom = currentRoom.getSouthExit();
+                }
+                if (direction.equals("west")) {
+                        nextRoom = currentRoom.getWestExit();
+                }
+
+                if (nextRoom == null) {
+                        System.out.println("There is no door!");
+                } // !Criar um menu para o usuário escolher os rolês
+                else {
+                        currentRoom = nextRoom;
+                        System.out.println("Você chegou na região " + currentRoom.getNome()
+                                        + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
+                        System.out.println("");
+                        for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
+                                System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
+
+                        }
+
+                        System.out.print("Exits: ");
+                        if (currentRoom.getNorthExit() != null) {
+                                System.out.print("north ");
+                        }
+                        if (currentRoom.getEastExit() != null) {
+                                System.out.print("east ");
+                        }
+                        if (currentRoom.getSouthExit() != null) {
+                                System.out.print("south ");
+                        }
+                        if (currentRoom.getWestExit() != null) {
+                                System.out.print("west ");
+                        }
+                        System.out.println();
+                }
+        }
+
+        /**
+         * "Quit" was entered. Check the rest of the command to see
+         * whether we really quit the game.
+         * 
+         * @return true, if this command quits the game, false otherwise.
+         */
+        private boolean quit(Command command) {
+                if (command.hasSecondWord()) {
+                        System.out.println("Quit what?");
+                        return false;
+                } else {
+                        return true; // signal that we want to quit
+                }
         }
 
         // *Cria todas as regiões, linka suas saidas e sorteia a regiao atual.
@@ -183,7 +372,7 @@ public class Game {
                 currentRoom = listaRegioes[randomRegiao.nextInt(listaRegioes.length)];
                 System.out.println("\n\n******************************");
                 System.out.println("A região inicial sorteada foi:" + currentRoom.getNome());
-                currentRoom = centro; // start game outside
+                System.out.println("\n\n******************************");
         }
 
         private void createRoles() {
@@ -279,172 +468,69 @@ public class Game {
                 Date Rafael = new Date("Rafael",
                                 "Rafael é um entusiasta de atividades esportivas e aventuras ao ar livre. Com sua energia contagiante, ele busca constantemente novas experiências esportivas e adrenalina.",
                                 boneViseiraEsportiva, miranteMangabeiras);
+
         }
 
-        /**
-         * Main play routine. Loops until end of play.
-         */
-        public void play() {
-                printWelcome();
+        // *Cria todos os presentes disponíveis
+        private void createPresentes() {
+                bichoPelucia = new Presente("Girafa de Pelúcia",
+                                "Encante-se com a fofura desta adorável girafa de pelúcia. Perfeita para abraçar e decorar qualquer ambiente, esta pelúcia traz consigo a doçura e o encanto que só um presente especial pode oferecer.");
 
-                // Enter the main command loop. Here we repeatedly read commands and
-                // execute them until the game is over.
+                terco = new Presente("Terço",
+                                "Encontre paz e espiritualidade com este belo terço, uma manifestação de fé e devoção. Cada conta representa uma prece, guiando-o por um caminho de serenidade e conexão espiritual.");
 
-                boolean finished = false;
-                while (!finished) {
-                        Command command = parser.getCommand();
-                        finished = processCommand(command);
-                }
-                System.out.println("Thank you for playing.  Good bye.");
+                incenso = new Presente(
+                                "Incenso de Lavanda",
+                                "Desperte seus sentidos com o aroma relaxante da lavanda. Este incenso é uma ode à tranquilidade, proporcionando uma atmosfera calma e serena para momentos de meditação e relaxamento.");
+
+                pinBroche = new Presente("Pin Broche Personalizado do Parque",
+                                "Leve consigo uma lembrança única do nosso parque! Este pin personalizado é um símbolo especial que representa momentos divertidos e memoráveis, oferecendo um toque especial a qualquer coleção.");
+
+                camisaDeTime = new Presente("Camisa de Time",
+                                "Mostre seu amor pelo esporte e pelo seu time favorito com esta camisa oficial. Além de expressar sua paixão, esta peça é um símbolo de união e lealdade à equipe que você tanto admira.");
+
+                grudeTattoo = new Presente("Grude Tattoo",
+                                "Experimente a arte da tatuagem temporária com o Grude Tattoo! Esta tatuagem é uma expressão temporária de estilo e personalidade, permitindo que você exiba designs únicos por um tempo antes de desaparecer suavemente.");
+
+                buqueDeFlor = new Presente("Buquê de Flores",
+                                "Celebre momentos especiais com a beleza e fragrância deste encantador buquê de flores. Cada flor é um símbolo de carinho e afeto, transmitindo emoções que vão além das palavras.");
+
+                lataRefrigerante = new Presente("Lata de Refrigerante",
+                                "Refresque-se com esta lata de refrigerante, perfeita para momentos de descontração e diversão. Uma bebida gelada para acompanhar os melhores momentos da vida.");
+
+                chaveiro = new Presente("Chaveiro Personalizado do Mirante",
+                                "Carregue consigo a lembrança de vistas panorâmicas deslumbrantes com este chaveiro personalizado do nosso mirante. Este objeto é mais do que um acessório; é uma conexão com momentos memoráveis e paisagens deslumbrantes.");
+
+                quadroDecorativo = new Presente("Quadro Decorativo",
+                                "Transforme qualquer espaço com a beleza deste quadro decorativo. Cada detalhe da obra de arte é uma expressão de criatividade e estilo, adicionando personalidade e charme a qualquer ambiente.");
+
+                filtroDosSonhos = new Presente("Filtro dos Sonhos",
+                                "Deixe-se envolver pela magia e pelo simbolismo deste belo filtro dos sonhos. Originário das tradições indígenas, este artefato é mais do que um adorno decorativo; é um guardião dos sonhos.");
+
+                copoPersonalizado = new Presente("Copo Personalizado",
+                                "Desfrute de suas bebidas favoritas com estilo usando este copo personalizado. Cada detalhe deste copo foi pensado para proporcionar uma experiência única de degustação, unindo elegância e praticidade.");
+
+                ingressosOpenBar = new Presente("Ingressos Open Bar para um festival de música eletrônica",
+                                "Preparado para uma experiência única e eletrizante? Junte-se a nós no Festival Épico de Música Eletrônica, onde a batida envolvente e os ritmos pulsantes ganham vida em um espetáculo inigualável!");
+
+                copoStanley = new Presente("Copo Stanley",
+                                "Apresentamos o Copo Stanley, uma obra-prima de engenharia que transcende a mera funcionalidade, elevando o ato de saborear sua bebida a um novo patamar. Combinando estilo clássico e desempenho excepcional, este copo é mais do que um recipiente; é uma afirmação de qualidade e bom gosto.");
+
+                garrafaRoyalSalute = new Presente("Uma garrafa de Royal Salute.",
+                                "Descubra a realeza no mundo dos whiskies com a lendária garrafa de Royal Salute. Esta obra-prima destilada é um tributo à tradição, elegância e maestria na arte do whisky escocês. Cada gole é uma jornada sensorial que transcende o comum, levando você a um reino de sofisticação.");
+
+                ingressosBalada = new Presente(" Ingressos para uma balada na cidade",
+                                "Prepare-se para uma experiência única e eletrizante! Apresentamos os ingressos para a Balada City Vibes, uma noite que promete ser o ápice da diversão e boa música na cidade. Garanta seu lugar para uma celebração épica que ficará gravada na memória!");
+
+                discoDeVinil = new Presente("Um disco de vinil de MPB.",
+                                "Mergulhe na riqueza sonora da Música Popular Brasileira com este autêntico disco de vinil. Mais do que uma simples coleção de músicas, este vinil é uma jornada emocional pelas melodias cativantes e poesias profundas que definem a essência da música brasileira.");
+
+                livroAutografado = new Presente("Um livro autografado por Taylor Jenkins Reid.",
+                                "Se você é apaixonado por literatura, não pode perder a oportunidade de possuir uma jóia literária única. Apresentamos a edição especial autografada de Os sete maridos de Evelyn Hugo  pela renomada autora Taylor Jenkins Reid.");
+
+                boneViseiraEsportiva = new Presente("Boné ou Viseira Esportiva.",
+                                "Explore o mundo esportivo com um toque de estilo e proteção solar. Apresentamos a escolha entre o clássico Boné e a elegante Viseira Esportiva, ambos desenhados para elevar o seu visual durante suas atividades ao ar livre.");
+
         }
 
-        /**
-         * Print out the opening message for the player.
-         */
-        private void printWelcome() {
-                System.out.println();
-                System.out.println("Bem vindo ao desafio Find the Date!");
-                System.out.println(
-                                "Neste desafio você terá que realizar uma pesquisa de campo para descobrir qual o melhor rolê para levar a sua paixão! E como você deseja impressiona-la, escolha um presente que você ache que combine com ela.");
-                System.out.println("");
-                System.out.println("Type 'help' if you need help.");
-                System.out.println();
-                // !AJUSTAR FLUXO DO JOGO, NÃO HÁ DESCRIÇÃO NA REGIÃO E SIM NOS ROLÊS.
-                // !CRIAR UM MENU QUE O USUÁRIO POSSA SABER QUAIS ROLÊS HÁ EM CADA REGIAO
-                System.out.println("Você iniciou sua busca na região: " + currentRoom.getNome()
-                                + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
-                System.out.println("");
-                for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
-                        System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
-
-                }
-                System.out.print("Exits: ");
-                if (currentRoom.getNorthExit() != null) {
-                        System.out.print("north ");
-                }
-                if (currentRoom.getNorthExit() != null) {
-                        System.out.print("east ");
-                }
-                if (currentRoom.getSouthExit() != null) {
-                        System.out.print("south ");
-                }
-                if (currentRoom.getWestExit() != null) {
-                        System.out.print("west ");
-                }
-                System.out.println();
-        }
-
-        /**
-         * Given a command, process (that is: execute) the command.
-         * 
-         * @param command The command to be processed.
-         * @return true If the command ends the game, false otherwise.
-         */
-        private boolean processCommand(Command command) {
-                boolean wantToQuit = false;
-
-                if (command.isUnknown()) {
-                        System.out.println("I don't know what you mean...");
-                        return false;
-                }
-
-                String commandWord = command.getCommandWord();
-                if (commandWord.equals("help")) {
-                        printHelp();
-                } else if (commandWord.equals("go")) {
-                        goRoom(command);
-                } else if (commandWord.equals("quit")) {
-                        wantToQuit = quit(command);
-                }
-
-                return wantToQuit;
-        }
-
-        // implementations of user commands:
-
-        /**
-         * Print out some help information.
-         * Here we print some stupid, cryptic message and a list of the
-         * command words.
-         */
-        private void printHelp() {
-                System.out.println("You are lost. You are alone. You wander");
-                System.out.println("around at the university.");
-                System.out.println();
-                System.out.println("Your command words are:");
-                System.out.println("   go quit help");
-        }
-
-        /**
-         * Try to go in one direction. If there is an exit, enter
-         * the new room, otherwise print an error message.
-         */
-        private void goRoom(Command command) {
-                if (!command.hasSecondWord()) {
-                        // if there is no second word, we don't know where to go...
-                        System.out.println("Go where?");
-                        return;
-                }
-
-                String direction = command.getSecondWord();
-
-                // Try to leave current room.
-                Regiao nextRoom = null;
-                if (direction.equals("north")) {
-                        nextRoom = currentRoom.getNorthExit();
-                }
-                if (direction.equals("east")) {
-                        nextRoom = currentRoom.getEastExit();
-                }
-                if (direction.equals("south")) {
-                        nextRoom = currentRoom.getSouthExit();
-                }
-                if (direction.equals("west")) {
-                        nextRoom = currentRoom.getWestExit();
-                }
-
-                if (nextRoom == null) {
-                        System.out.println("There is no door!");
-                } // !Criar um menu para o usuário escolher os rolês
-                else {
-                        currentRoom = nextRoom;
-                        System.out.println("Você chegou na região " + currentRoom.getNome()
-                                        + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
-                        System.out.println("");
-                        for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
-                                System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
-
-                        }
-
-                        System.out.print("Exits: ");
-                        if (currentRoom.getNorthExit() != null) {
-                                System.out.print("north ");
-                        }
-                        if (currentRoom.getEastExit() != null) {
-                                System.out.print("east ");
-                        }
-                        if (currentRoom.getSouthExit() != null) {
-                                System.out.print("south ");
-                        }
-                        if (currentRoom.getWestExit() != null) {
-                                System.out.print("west ");
-                        }
-                        System.out.println();
-                }
-        }
-
-        /**
-         * "Quit" was entered. Check the rest of the command to see
-         * whether we really quit the game.
-         * 
-         * @return true, if this command quits the game, false otherwise.
-         */
-        private boolean quit(Command command) {
-                if (command.hasSecondWord()) {
-                        System.out.println("Quit what?");
-                        return false;
-                } else {
-                        return true; // signal that we want to quit
-                }
-        }
 }
