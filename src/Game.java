@@ -23,8 +23,10 @@ import javax.management.relation.Role;
 public class Game {
         private Parser parser;
         private Jogador jogador;
-        private Regiao currentRoom;
+        private Regiao regiaoAtual;
+        private Roles roleAtual;
         private Date date;
+        private Date[] listaDates;
         private Regiao barreiro, centro, oeste, pampulha, vendaNova, leste;
         private Roles parqueJacques,
                         shoppingDelRey,
@@ -61,8 +63,8 @@ public class Game {
          */
         public Game() {
                 createPresentes();
-                createDates();
                 createRoles();
+                createDates();
                 createRegioes();
 
                 parser = new Parser();
@@ -109,8 +111,31 @@ public class Game {
                         wantToQuit = quit(command);
                 } else if (commandWord.equals("enter")) {
                         enterRole(command); // !Criar função para entrar no rolê
+                } else if (commandWord.equals("choose")) {
+                        chooseRoleOrPresente(command);
+                } else if (commandWord.equals("finish")) {
+                        boolean aprovado = true;
+                        if (jogador.getPresenteAtual() == date.getPresente()) {
+                                System.err.println("Parabéns, você acertou o presente!!!");
+                        } else {
+                                System.err.println("Que pena, " + date.getNome()
+                                                + "achou que você prestou pouca atenção em seus gostos ;-; , rode mais por BH para encontrar o presente ideal. ");
+                                aprovado = false;
+                        }
+                        if (jogador.getRoleAtual() == date.getRoleIdeal()) {
+                                System.err.println("Parabéns, você acertou o presente!!!");
+                        } else {
+                                System.err.println("Que pena, " + date.getNome()
+                                                + "achou que você prestou pouca atenção em seus gostos ;-; , rode mais por BH para encontrar o role ideal. ");
+                                aprovado = false;
+                        }
+                        if (aprovado) {
+                                System.err.println(
+                                                "Parabéns, seu data adorou passar este dia com você, caso vocês se casarem eu espero ser o padrinho!!! :P");
+                                Command jogoZerado = new Command("quit", null);
+                                wantToQuit = quit(jogoZerado);
+                        }
                 }
-
                 return wantToQuit;
         }
 
@@ -127,27 +152,27 @@ public class Game {
                 System.out.println();
 
                 geraDateAleatorio();
-                geraRoleAleatorio(); // !Continuar daqui, gerar role aleatorio, implementar funcao "remember", "pick
-                                     // present", "pick role" e "choose"
+                geraRegiaoAleatorio(); // !Continuar daqui, gerar role aleatorio, implementar funcao "remember", "pick
+                                       // present", "pick role" e "choose"
 
-                System.out.println("Você iniciou sua busca na região: " + currentRoom.getNome()
+                System.out.println("Você iniciou sua busca na região: " + regiaoAtual.getNome()
                                 + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
                 System.out.println("");
-                for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
-                        System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
+                for (int i = 0; i < regiaoAtual.getListaRoles().size(); i++) {
+                        System.out.println(i + " - " + regiaoAtual.getListaRoles().get(i).getNome());
 
                 }
                 System.out.print("Para sair desta região digite para onde deseja ir: ");
-                if (currentRoom.getNorthExit() != null) {
+                if (regiaoAtual.getNorthExit() != null) {
                         System.out.print("north ");
                 }
-                if (currentRoom.getNorthExit() != null) {
+                if (regiaoAtual.getNorthExit() != null) {
                         System.out.print("east ");
                 }
-                if (currentRoom.getSouthExit() != null) {
+                if (regiaoAtual.getSouthExit() != null) {
                         System.out.print("south ");
                 }
-                if (currentRoom.getWestExit() != null) {
+                if (regiaoAtual.getWestExit() != null) {
                         System.out.print("west ");
                 }
                 System.out.println();
@@ -155,14 +180,30 @@ public class Game {
 
         private void geraDateAleatorio() {
                 // *Gera um date aleatório
-                Date[] listaDates = { Maria, Lucas, Sofia, Ana, Joao, Pedro, Rafael };
                 Random randomDate = new Random();
                 date = listaDates[randomDate.nextInt(listaDates.length)];
                 System.out.println("\n\n******************************");
                 System.out.println("O date sorteado foi:" + date.getNome());
+                System.out.println(date.getPresente().getNome());
+                System.out.println(date.getRoleIdeal().getNome());
                 System.out.println("******************************\n");
                 System.err.println(date.getDescricao());
                 System.out.println("Digite \"remember date \" para relembrar de seu date!");
+        }
+
+        private void geraRegiaoAleatorio() {
+                Regiao[] listaRegioes = { barreiro,
+                                centro,
+                                oeste,
+                                vendaNova,
+                                leste,
+                                pampulha };
+
+                Random randomRegiao = new Random();
+                regiaoAtual = listaRegioes[randomRegiao.nextInt(listaRegioes.length)];
+                System.out.println("\n\n******************************");
+                System.out.println("A região inicial sorteada foi:" + regiaoAtual.getNome());
+                System.out.println("******************************\n");
         }
 
         // implementations of user commands:
@@ -177,7 +218,7 @@ public class Game {
                 System.out.println("around at the university.");
                 System.out.println();
                 System.out.println("Your command words are:");
-                System.out.println("   go enter quit help");
+                System.out.println(" choose finish go enter quit help");
         }
 
         /**
@@ -196,109 +237,79 @@ public class Game {
                 // Try to leave current room.
                 Regiao nextRoom = null;
                 if (direction.equals("north")) {
-                        nextRoom = currentRoom.getNorthExit();
+                        nextRoom = regiaoAtual.getNorthExit();
                 }
                 if (direction.equals("east")) {
-                        nextRoom = currentRoom.getEastExit();
+                        nextRoom = regiaoAtual.getEastExit();
                 }
                 if (direction.equals("south")) {
-                        nextRoom = currentRoom.getSouthExit();
+                        nextRoom = regiaoAtual.getSouthExit();
                 }
                 if (direction.equals("west")) {
-                        nextRoom = currentRoom.getWestExit();
+                        nextRoom = regiaoAtual.getWestExit();
                 }
 
                 if (nextRoom == null) {
-                        System.out.println("There is no door!");
-                } // !Criar um menu para o usuário escolher os rolês
-                else {
-                        currentRoom = nextRoom;
-                        System.out.println("Você chegou na região " + currentRoom.getNome()
+                        System.out.println("Não há esta saida!");
+                } else {
+                        regiaoAtual = nextRoom;
+                        System.out.println("Você chegou na região " + regiaoAtual.getNome()
                                         + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
                         System.out.println("");
-                        for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
-                                System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
+                        for (int i = 0; i < regiaoAtual.getListaRoles().size(); i++) {
+                                System.out.println(i + " - " + regiaoAtual.getListaRoles().get(i).getNome());
 
                         }
 
                         System.out.print("Exits: ");
-                        if (currentRoom.getNorthExit() != null) {
+                        if (regiaoAtual.getNorthExit() != null) {
                                 System.out.print("north ");
                         }
-                        if (currentRoom.getEastExit() != null) {
+                        if (regiaoAtual.getEastExit() != null) {
                                 System.out.print("east ");
                         }
-                        if (currentRoom.getSouthExit() != null) {
+                        if (regiaoAtual.getSouthExit() != null) {
                                 System.out.print("south ");
                         }
-                        if (currentRoom.getWestExit() != null) {
+                        if (regiaoAtual.getWestExit() != null) {
                                 System.out.print("west ");
                         }
                         System.out.println();
                 }
         }
 
-        private void enterRole(Command command) {
+        private void chooseRoleOrPresente(Command command) {
                 if (!command.hasSecondWord()) {
                         // if there is no second word, we don't know where to go...
-                        System.out.println("Enter where?");
+                        System.out.println("Entrar aonde?");
                         return;
                 }
 
+                if ("presente".equals(command.getSecondWord())) {
+                        jogador.setPresenteAtual(roleAtual.getPresente());
+                } else if ("role".equals(command.getSecondWord())) {
+                        jogador.setRoleAtual(roleAtual);
+                }
+        }
+
+        private void enterRole(Command command) {
                 String direction = command.getSecondWord();
-                Regiao nextRoom = null;
-                // Try to leave current room.
-                if (Integer.parseInt(direction) + 1 > currentRoom.getListaRoles().size()
-                                || Integer.parseInt(direction) + 1 < 0) {
-                        nextRoom = null;
-                } else {
-                        Roles role = currentRoom.getListaRoles().get(Integer.parseInt(direction));
-                        System.err.println(role.getNome());
-                        System.err.println(role.getDescricao());
+
+                if (!command.hasSecondWord() || Integer.parseInt(direction) < 0
+                                || Integer.parseInt(direction) > regiaoAtual.getListaRoles().size() - 1) {
+                        // if there is no second word, we don't know where to go...
+                        System.out.println("Entrar aonde?");
+                        return;
                 }
 
-                // !Modelo
-                if (direction.equals("north")) {
-                        nextRoom = currentRoom.getNorthExit();
-                }
-                if (direction.equals("east")) {
-                        nextRoom = currentRoom.getEastExit();
-                }
-                if (direction.equals("south")) {
-                        nextRoom = currentRoom.getSouthExit();
-                }
-                if (direction.equals("west")) {
-                        nextRoom = currentRoom.getWestExit();
-                }
+                Roles role = regiaoAtual.getListaRoles().get(Integer.parseInt(direction));
+                System.out.println("Você chegou no rolê " + role.getNome()
+                                + ".\n Para escolher este rolê digite \"choose role\" ");
+                System.out.println(role.getDescricao());
+                System.out.println("Você encontrou um/uma " + role.getPresente()
+                                + ".\n Para pega-lo digite \"choose presente\" ");
+                roleAtual = role;
 
-                if (nextRoom == null) {
-                        System.out.println("There is no door!");
-                } // !Criar um menu para o usuário escolher os rolês
-                else {
-                        currentRoom = nextRoom;
-                        System.out.println("Você chegou na região " + currentRoom.getNome()
-                                        + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
-                        System.out.println("");
-                        for (int i = 0; i < currentRoom.getListaRoles().size(); i++) {
-                                System.out.println(i + " - " + currentRoom.getListaRoles().get(i).getNome());
-
-                        }
-
-                        System.out.print("Exits: ");
-                        if (currentRoom.getNorthExit() != null) {
-                                System.out.print("north ");
-                        }
-                        if (currentRoom.getEastExit() != null) {
-                                System.out.print("east ");
-                        }
-                        if (currentRoom.getSouthExit() != null) {
-                                System.out.print("south ");
-                        }
-                        if (currentRoom.getWestExit() != null) {
-                                System.out.print("west ");
-                        }
-                        System.out.println();
-                }
         }
 
         /**
@@ -361,18 +372,6 @@ public class Game {
                 pampulha.setRoles(calouradaUFMG);
                 pampulha.setRoles(zoologicoBeloHorizonte);
 
-                Regiao[] listaRegioes = { barreiro,
-                                centro,
-                                oeste,
-                                vendaNova,
-                                leste,
-                                pampulha };
-
-                Random randomRegiao = new Random();
-                currentRoom = listaRegioes[randomRegiao.nextInt(listaRegioes.length)];
-                System.out.println("\n\n******************************");
-                System.out.println("A região inicial sorteada foi:" + currentRoom.getNome());
-                System.out.println("\n\n******************************");
         }
 
         private void createRoles() {
@@ -385,7 +384,7 @@ public class Game {
                                 "Um dos maiores shoppings de Belo Horizonte, oferece uma variedade de lojas, cinemas, restaurantes e áreas de entretenimento. É um local movimentado e ideal para quem gosta de fazer compras ou curtir um cinema com o date.\n",
                                 livroAutografado);
 
-                barDoGanso = new Roles("Shopping Del Rey",
+                barDoGanso = new Roles("Bar do ganso",
                                 "É um lugar simples para quem gosta de um clima mais intimista e quer desfrutar de um bom papo acompanhado de petiscos e bebidas.",
                                 garrafaRoyalSalute);
                 // Centro:
@@ -468,6 +467,8 @@ public class Game {
                 Date Rafael = new Date("Rafael",
                                 "Rafael é um entusiasta de atividades esportivas e aventuras ao ar livre. Com sua energia contagiante, ele busca constantemente novas experiências esportivas e adrenalina.",
                                 boneViseiraEsportiva, miranteMangabeiras);
+
+                listaDates = new Date[] { Maria, Lucas, Sofia, Ana, Joao, Pedro, Rafael };
 
         }
 
