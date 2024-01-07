@@ -111,6 +111,11 @@ public class Game {
                         wantToQuit = quit(command);
                 } else if (commandWord.equals("enter")) {
                         enterRole(command); // !Criar função para entrar no rolê
+                } else if (commandWord.equals("remember")) {
+                        System.out.println("\n\n******************************");
+                        System.out.println("O date sorteado foi:" + date.getNome());
+                        System.out.println(date.getDescricao());
+                        System.out.println("******************************\n");
                 } else if (commandWord.equals("choose")) {
                         chooseRoleOrPresente(command);
                 } else if (commandWord.equals("finish")) {
@@ -287,8 +292,11 @@ public class Game {
 
                 if ("presente".equals(command.getSecondWord())) {
                         jogador.setPresenteAtual(roleAtual.getPresente());
+                        System.err.println(roleAtual.getPresente().getNome() + "marcado como presente escolhido!");
                 } else if ("role".equals(command.getSecondWord())) {
                         jogador.setRoleAtual(roleAtual);
+                        System.err.println(roleAtual.getNome() + "marcado como rolê escolhido!");
+
                 }
         }
 
@@ -306,8 +314,8 @@ public class Game {
                 System.out.println("Você chegou no rolê " + role.getNome()
                                 + ".\n Para escolher este rolê digite \"choose role\" ");
                 System.out.println(role.getDescricao());
-                System.out.println("Você encontrou um/uma " + role.getPresente()
-                                + ".\n Para pega-lo digite \"choose presente\" ");
+                System.out.println("\nVocê encontrou um/uma " + role.getPresente().getNome()
+                                + ".\nPara pega-lo digite \"choose presente\" ");
                 roleAtual = role;
 
         }
@@ -517,19 +525,19 @@ public class Game {
                 copoStanley = new Presente("Copo Stanley",
                                 "Apresentamos o Copo Stanley, uma obra-prima de engenharia que transcende a mera funcionalidade, elevando o ato de saborear sua bebida a um novo patamar. Combinando estilo clássico e desempenho excepcional, este copo é mais do que um recipiente; é uma afirmação de qualidade e bom gosto.");
 
-                garrafaRoyalSalute = new Presente("Uma garrafa de Royal Salute.",
+                garrafaRoyalSalute = new Presente("Uma garrafa de Royal Salute",
                                 "Descubra a realeza no mundo dos whiskies com a lendária garrafa de Royal Salute. Esta obra-prima destilada é um tributo à tradição, elegância e maestria na arte do whisky escocês. Cada gole é uma jornada sensorial que transcende o comum, levando você a um reino de sofisticação.");
 
                 ingressosBalada = new Presente(" Ingressos para uma balada na cidade",
                                 "Prepare-se para uma experiência única e eletrizante! Apresentamos os ingressos para a Balada City Vibes, uma noite que promete ser o ápice da diversão e boa música na cidade. Garanta seu lugar para uma celebração épica que ficará gravada na memória!");
 
-                discoDeVinil = new Presente("Um disco de vinil de MPB.",
+                discoDeVinil = new Presente("Um disco de vinil de MPB",
                                 "Mergulhe na riqueza sonora da Música Popular Brasileira com este autêntico disco de vinil. Mais do que uma simples coleção de músicas, este vinil é uma jornada emocional pelas melodias cativantes e poesias profundas que definem a essência da música brasileira.");
 
-                livroAutografado = new Presente("Um livro autografado por Taylor Jenkins Reid.",
+                livroAutografado = new Presente("Um livro autografado por Taylor Jenkins Reid",
                                 "Se você é apaixonado por literatura, não pode perder a oportunidade de possuir uma jóia literária única. Apresentamos a edição especial autografada de Os sete maridos de Evelyn Hugo  pela renomada autora Taylor Jenkins Reid.");
 
-                boneViseiraEsportiva = new Presente("Boné ou Viseira Esportiva.",
+                boneViseiraEsportiva = new Presente("Boné ou Viseira Esportiva",
                                 "Explore o mundo esportivo com um toque de estilo e proteção solar. Apresentamos a escolha entre o clássico Boné e a elegante Viseira Esportiva, ambos desenhados para elevar o seu visual durante suas atividades ao ar livre.");
 
         }
