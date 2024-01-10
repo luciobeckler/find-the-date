@@ -85,7 +85,7 @@ public class Game {
                         Command command = parser.getCommand();
                         finished = processCommand(command);
                 }
-                System.out.println("Thank you for playing.  Good bye.");
+                System.out.println("Obrigado por jogar.  Até mais!");
         }
 
         /**
@@ -98,7 +98,7 @@ public class Game {
                 boolean wantToQuit = false;
 
                 if (command.isUnknown()) {
-                        System.out.println("I don't know what you mean...");
+                        System.out.println("Não entendi o que você quis dizer.");
                         return false;
                 }
 
@@ -151,7 +151,7 @@ public class Game {
                 System.out.println();
                 System.out.println("Bem vindo ao desafio Find the Date!");
                 System.out.println(
-                                "Neste desafio você terá que realizar uma pesquisa de campo para descobrir qual o melhor rolê para levar a sua paixão! E como você deseja impressiona-la, escolha um presente que você ache que combine com ela.");
+                                "Neste desafio você terá que realizar uma pesquisa de campo para descobrir qual o melhor rolê para levar o seu date! E como você deseja impressiona-la, escolha um presente que você ache que combine com ela.");
                 System.out.println("");
                 System.out.println("Para obter ajuda digite 'help'");
                 System.out.println();
