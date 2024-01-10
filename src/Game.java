@@ -49,7 +49,7 @@ public class Game {
         private Presente boneViseiraEsportiva, livroAutografado, garrafaRoyalSalute, copoPersonalizado, discoDeVinil,
                         quadroDecorativo, chaveiro, lataRefrigerante, buqueDeFlor, grudeTattoo, camisaDeTime,
                         ingressosBalada,
-                        pinBroche, filtroDosSonhos, incenso, terco, ingressosOpenBar, bichoPelucia, copoStanley;
+                        pinBroche, filtroDosSonhos, incenso, terco, ingressosOpenBar, bichoPelucia;
         private Date Maria,
                         Lucas,
                         Sofia,
@@ -136,7 +136,7 @@ public class Game {
                         }
                         if (aprovado) {
                                 System.err.println(
-                                                "Parabéns, seu data adorou passar este dia com você, caso vocês se casarem eu espero ser o padrinho!!! :P");
+                                                "Parabéns, seu date adorou passar este dia com você, caso vocês se casarem eu espero ser o padrinho!!! :P");
                                 Command jogoZerado = new Command("quit", null);
                                 wantToQuit = quit(jogoZerado);
                         }
@@ -161,7 +161,7 @@ public class Game {
                                        // present", "pick role" e "choose"
 
                 System.out.println("Você iniciou sua busca na região: " + regiaoAtual.getNome()
-                                + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"go numero\".");
+                                + "! \nSegue a lista de rolês, Para entrar em um rolê desta região, digite \"enter numero\".");
                 System.out.println("");
                 for (int i = 0; i < regiaoAtual.getListaRoles().size(); i++) {
                         System.out.println(i + " - " + regiaoAtual.getListaRoles().get(i).getNome());
@@ -219,10 +219,7 @@ public class Game {
          * command words.
          */
         private void printHelp() {
-                System.out.println("You are lost. You are alone. You wander");
-                System.out.println("around at the university.");
-                System.out.println();
-                System.out.println("Your command words are:");
+                System.out.println("Suas palavras de comando são:");
                 System.out.println(" choose finish go enter quit help");
         }
 
@@ -292,10 +289,10 @@ public class Game {
 
                 if ("presente".equals(command.getSecondWord())) {
                         jogador.setPresenteAtual(roleAtual.getPresente());
-                        System.err.println(roleAtual.getPresente().getNome() + "marcado como presente escolhido!");
+                        System.err.println(roleAtual.getPresente().getNome() + " marcado como presente escolhido!");
                 } else if ("role".equals(command.getSecondWord())) {
                         jogador.setRoleAtual(roleAtual);
-                        System.err.println(roleAtual.getNome() + "marcado como rolê escolhido!");
+                        System.err.println(roleAtual.getNome() + " marcado como rolê escolhido!");
 
                 }
         }
@@ -454,7 +451,7 @@ public class Game {
 
                 Date Lucas = new Date("Lucas",
                                 "Lucas é um estudante da UFMG e adora festas universitárias. Ele é extrovertido, gosta de socializar e de participar de eventos estudantis animados.\n",
-                                copoStanley, calouradaUFMG);
+                                copoPersonalizado, calouradaUFMG);
 
                 Date Sofia = new Date("Sofia",
                                 "Sofia adora rolês chiques e tem paixão por carros. Ela gosta de lugares sofisticados e aprecia passeios de carro pela cidade.",
@@ -521,9 +518,6 @@ public class Game {
 
                 ingressosOpenBar = new Presente("Ingressos Open Bar para um festival de música eletrônica",
                                 "Preparado para uma experiência única e eletrizante? Junte-se a nós no Festival Épico de Música Eletrônica, onde a batida envolvente e os ritmos pulsantes ganham vida em um espetáculo inigualável!");
-
-                copoStanley = new Presente("Copo Stanley",
-                                "Apresentamos o Copo Stanley, uma obra-prima de engenharia que transcende a mera funcionalidade, elevando o ato de saborear sua bebida a um novo patamar. Combinando estilo clássico e desempenho excepcional, este copo é mais do que um recipiente; é uma afirmação de qualidade e bom gosto.");
 
                 garrafaRoyalSalute = new Presente("Uma garrafa de Royal Salute",
                                 "Descubra a realeza no mundo dos whiskies com a lendária garrafa de Royal Salute. Esta obra-prima destilada é um tributo à tradição, elegância e maestria na arte do whisky escocês. Cada gole é uma jornada sensorial que transcende o comum, levando você a um reino de sofisticação.");
